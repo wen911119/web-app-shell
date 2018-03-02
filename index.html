@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>wenjun-router</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="format-detection" content="telephone=no, email=no">
+    <!-- <style>body > div { height: 100%; }</style> -->
+    <style>
+        html,
+        body {
+            -ms-overflow-style: scrollbar;
+            -webkit-tap-highlight-color: transparent;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .app- {
+            transform: translateX(0px) !important;
+        }
+
+        /* .app-1 {
+            transform: translateX(0px) !important;
+        }
+
+        .app-2 {
+            transform: translateX(-375px) !important;
+        }
+
+        .app-3 {
+            transform: translateX(-750px) !important;
+        } */
+
+        iframe {
+            border: 0;
+        }
+    </style>
+    <script>
+        let deviceWidth = 375
+        let appsStack = {
+            stack: [],
+            currentIndex: -1
+        }
+        function refreshOrInit() {
+            // 刷新或者第一次进入
+            const appName = location.hash.replace('/', '').replace('#', '') || 'index'
+            appsStack.stack.push(appName)
+            appsStack.currentIndex = appsStack.stack.length - 1
+            let iframeNew = document.createElement('iframe')
+            iframeNew.src = 'http://10.100.0.39:8081/' + appName + '.html'
+            iframeNew.frameborder = 0
+            document.getElementById('apps-box').appendChild(iframeNew)
+        }
+        function backOrForward(type) {
+            // 前进或者后退
+            if (type === 'back') {
+                history.back()
+            }
+            setTimeout(function () {
+                const appName = location.hash.replace('/', '').replace('#', '') || 'index'
+                const newIndex = appsStack.stack.indexOf(appName)
+                if (newIndex === -1) {
+                    // 刷新页面后点了前进或者后退按钮
+                    console.log('这时候判断不出是前进还是后退')
+                    window.location.reload()
+                } else if (newIndex < appsStack.currentIndex) {
+                    // 后退
+                    console.log('后退')
+                } else if (newIndex > appsStack.currentIndex) {
+                    // 前进
+                    console.log('前进')
+                }
+                appsStack.currentIndex = newIndex
+                document.getElementById("apps-box").className = 'app-' + (newIndex + 1)
+            }, 100)
+        }
+        function openNewApp(appName) {
+            // 进入一个新微app
+            if (appsStack.stack.length - 1 !== appsStack.currentIndex) {
+                // 非栈顶
+                const needClear = appsStack.stack.splice(appsStack.currentIndex + 1, 9999)
+                for (let i = 0; i < needClear.length; i++) {
+                    let _id = needClear[i]
+                    const target = document.getElementById(_id)
+                    target.parentNode.removeChild(target)
+                }
+            }
+            appsStack.stack.push(appName)
+            appsStack.currentIndex = appsStack.stack.length - 1
+            document.getElementById('apps-box').style.width = `${deviceWidth * appsStack.stack.length}px`
+
+            history.pushState(null, null, '#/' + appName)
+            let iframeNew = document.createElement('iframe')
+            iframeNew.src = 'http://10.100.0.39:8081/' + appName + '.html'
+            iframeNew.id = appName
+            iframeNew.frameborder = 0
+            document.getElementById('apps-box').appendChild(iframeNew)
+            document.getElementById("apps-box").className = 'app-' + appsStack.stack.length
+
+        }
+
+        function genCss() {
+            deviceWidth = document.body.clientWidth
+            let cssFragment = `iframe{width: ${deviceWidth}px;}`
+            for (let i = 1; i < 100; i++) {
+                cssFragment += `.app-${i}{transform: translateX(-${deviceWidth * (i - 1)}px) !important;}`
+            }
+            document.getElementsByTagName('style')[0].innerHTML += cssFragment
+            document.getElementById('apps-box').style.width = `${deviceWidth}px`
+        }
+
+        window.addEventListener('popstate', function (e) {
+            backOrForward()
+        }, false);
+
+        window.addEventListener('load', function () {
+            console.log('刷新或者第一次进入')
+            genCss()
+            refreshOrInit()
+        }, false)
+
+
+        window.addEventListener('message', event => {
+            if (event.data === '_back_') {
+                backOrForward('back')
+            } else {
+                openNewApp(event.data)
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div id="apps-box" style="height: 100%;overflow: hidden;display: flex;transform: translateZ(0);transition: transform .3s;">
+    </div>
+</body>
+
+</html>
