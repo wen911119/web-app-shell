@@ -6,7 +6,7 @@
 ---|---|---|---|---|---|---|---|---|
 伪单页模式 | 90 | 50(卡顿) | 90 | 90 |  80| 92 | 90 | 90
 多页模式 | 80 | 80 | 80 | 80 | 80 | 60 |  80 | 60 |
-UA标识 | MQQBrowser |  | UCBrowser | Mobile Safari | 60 | Mobile Safari | MZBrowser | Mobile Safari
+UA标识 | MQQBrowser |  | UCBrowser | Chrome/(版本号>60) |  | Chrome/(版本号>60) | MZBrowser | OPR
 
 
 

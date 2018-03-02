@@ -19,7 +19,7 @@
             if(/(iPhone|iPad|iPod|iOS)/i.test(ua)){
                 return false
             }
-            if(/(MQQBrowser|UCBrowser|MZBrowser)/i.test(ua)){
+            if(/(MQQBrowser|UCBrowser|MZBrowser|OPR)/i.test(ua)){
                 return false
             }
             // chrome > 60
@@ -30,7 +30,7 @@
             return true
         }
         if(isShit()){
-            // alert(navigator.userAgent)
+            alert(navigator.userAgent)
             // 垃圾浏览器用多页模式
             window.location.href = window.location.href.replace('8082','8081')
         }
