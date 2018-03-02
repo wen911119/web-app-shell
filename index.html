@@ -10,6 +10,31 @@
     <meta name="apple-touch-fullscreen" content="yes">
     <meta name="format-detection" content="telephone=no, email=no">
     <!-- <style>body > div { height: 100%; }</style> -->
+    <!-- <script src="/vconsole.min.js"></script> -->
+    <script>
+        // 初始化
+        //var vConsole = new VConsole();
+        function isShit(){
+            var ua = navigator.userAgent
+            if(/(iPhone|iPad|iPod|iOS)/i.test(ua)){
+                return false
+            }
+            if(/(MQQBrowser|UCBrowser|MZBrowser)/i.test(ua)){
+                return false
+            }
+            // chrome > 60
+            var chromeVersion = ua.replace(/.+Chrome\/(\d\d).+/,"$1")
+            if(chromeVersion && chromeVersion > 60){
+                return false
+            }
+            return true
+        }
+        if(isShit()){
+            // alert(navigator.userAgent)
+            // 垃圾浏览器用多页模式
+            window.location.href = window.location.href.replace('8082','8081')
+        }
+    </script>
     <style>
         html,
         body {
@@ -26,37 +51,27 @@
             transform: translateX(0px) !important;
         }
 
-        /* .app-1 {
-            transform: translateX(0px) !important;
-        }
-
-        .app-2 {
-            transform: translateX(-375px) !important;
-        }
-
-        .app-3 {
-            transform: translateX(-750px) !important;
-        } */
-
         iframe {
             border: 0;
         }
     </style>
     <script>
-        let deviceWidth = 375
-        let appsStack = {
+        var deviceWidth = 375
+        var appsStack = {
             stack: [],
             currentIndex: -1
         }
+
+
         function refreshOrInit() {
             // 刷新或者第一次进入
-            const appName = location.hash.replace('/', '').replace('#', '') || 'index'
+            var appName = location.hash.replace('/', '').replace('#', '') || 'index'
             appsStack.stack.push(appName)
             appsStack.currentIndex = appsStack.stack.length - 1
-            let iframeNew = document.createElement('iframe')
+            var iframeNew = document.createElement('iframe')
             iframeNew.src = 'http://10.100.0.39:8081/' + appName + '.html'
             iframeNew.frameborder = 0
-            document.getElementById('apps-box').appendChild(iframeNew)
+            appsBox.appendChild(iframeNew)
         }
         function backOrForward(type) {
             // 前进或者后退
@@ -64,8 +79,8 @@
                 history.back()
             }
             setTimeout(function () {
-                const appName = location.hash.replace('/', '').replace('#', '') || 'index'
-                const newIndex = appsStack.stack.indexOf(appName)
+                var appName = location.hash.replace('/', '').replace('#', '') || 'index'
+                var newIndex = appsStack.stack.indexOf(appName)
                 if (newIndex === -1) {
                     // 刷新页面后点了前进或者后退按钮
                     console.log('这时候判断不出是前进还是后退')
@@ -78,42 +93,41 @@
                     console.log('前进')
                 }
                 appsStack.currentIndex = newIndex
-                document.getElementById("apps-box").className = 'app-' + (newIndex + 1)
+                appsBox.className = 'app-' + (newIndex + 1)
             }, 100)
         }
         function openNewApp(appName) {
             // 进入一个新微app
             if (appsStack.stack.length - 1 !== appsStack.currentIndex) {
                 // 非栈顶
-                const needClear = appsStack.stack.splice(appsStack.currentIndex + 1, 9999)
-                for (let i = 0; i < needClear.length; i++) {
-                    let _id = needClear[i]
-                    const target = document.getElementById(_id)
-                    target.parentNode.removeChild(target)
+                var needClear = appsStack.stack.splice(appsStack.currentIndex + 1, 9999)
+                for (var i = 0; i < needClear.length; i++) {
+                    var _id = needClear[i]
+                    var target = document.getElementById(_id)
+                    appsBox.removeChild(target)
                 }
             }
             appsStack.stack.push(appName)
             appsStack.currentIndex = appsStack.stack.length - 1
-            document.getElementById('apps-box').style.width = `${deviceWidth * appsStack.stack.length}px`
-
+            appsBox.style.width = (deviceWidth * appsStack.stack.length) + 'px'
             history.pushState(null, null, '#/' + appName)
-            let iframeNew = document.createElement('iframe')
+            var iframeNew = document.createElement('iframe')
             iframeNew.src = 'http://10.100.0.39:8081/' + appName + '.html'
             iframeNew.id = appName
             iframeNew.frameborder = 0
-            document.getElementById('apps-box').appendChild(iframeNew)
-            document.getElementById("apps-box").className = 'app-' + appsStack.stack.length
+            appsBox.appendChild(iframeNew)
+            appsBox.className = 'app-' + appsStack.stack.length
 
         }
 
         function genCss() {
             deviceWidth = document.body.clientWidth
-            let cssFragment = `iframe{width: ${deviceWidth}px;}`
-            for (let i = 1; i < 100; i++) {
-                cssFragment += `.app-${i}{transform: translateX(-${deviceWidth * (i - 1)}px) !important;}`
+            var cssFragment = 'iframe{width: ' + deviceWidth + 'px;}'
+            for (var i = 1; i < 100; i++) {
+                cssFragment += '.app-' + i + '{transform: translateX(-' + deviceWidth * (i - 1) + 'px) !important;}'
             }
             document.getElementsByTagName('style')[0].innerHTML += cssFragment
-            document.getElementById('apps-box').style.width = `${deviceWidth}px`
+            appsBox.style.width = deviceWidth + 'px'
         }
 
         window.addEventListener('popstate', function (e) {
@@ -122,16 +136,18 @@
 
         window.addEventListener('load', function () {
             console.log('刷新或者第一次进入')
+            window.appsBox = document.getElementById('apps-box')
             genCss()
             refreshOrInit()
         }, false)
 
-
-        window.addEventListener('message', event => {
+        window.addEventListener('message', function (event) {
             if (event.data === '_back_') {
                 backOrForward('back')
             } else {
-                openNewApp(event.data)
+                if (typeof event.data === 'string') {
+                    openNewApp(event.data)
+                }
             }
         });
     </script>
