@@ -14,25 +14,25 @@
     <script>
         // 初始化
         //var vConsole = new VConsole();
-        function isShit(){
+        function isShit() {
             var ua = navigator.userAgent
-            if(/(iPhone|iPad|iPod|iOS)/i.test(ua)){
+            if (/(iPhone|iPad|iPod|iOS)/i.test(ua)) {
                 return false
             }
-            if(/(MQQBrowser|UCBrowser|MZBrowser|OPR)/i.test(ua)){
+            if (/(MQQBrowser|UCBrowser|MZBrowser|OPR)/i.test(ua)) {
                 return false
             }
             // chrome > 60
-            var chromeVersion = ua.replace(/.+Chrome\/(\d\d).+/,"$1")
-            if(chromeVersion && chromeVersion > 60){
+            var chromeVersion = ua.replace(/.+Chrome\/(\d\d).+/, "$1")
+            if (chromeVersion && chromeVersion > 60) {
                 return false
             }
             return true
         }
-        if(isShit()){
+        if (isShit()) {
             alert(navigator.userAgent)
             // 垃圾浏览器用多页模式
-            window.location.href = window.location.href.replace('8082','8081')
+            window.location.href = window.location.href.replace('8082', '8081')
         }
     </script>
     <style>
@@ -54,9 +54,18 @@
         iframe {
             border: 0;
         }
+
+        .empty {
+            background-image: url('./empty.svg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 30%;
+            background-color: #f5f5f5;
+        }
     </style>
     <script>
         var deviceWidth = 375
+        var baseTargetUrl = 'http://192.168.31.10:8081/'
         var appsStack = {
             stack: [],
             currentIndex: -1
@@ -69,8 +78,12 @@
             appsStack.stack.push(appName)
             appsStack.currentIndex = appsStack.stack.length - 1
             var iframeNew = document.createElement('iframe')
-            iframeNew.src = 'http://10.100.0.39:8081/' + appName + '.html'
-            iframeNew.frameborder = 0
+            iframeNew.id = appName
+            iframeNew.src = baseTargetUrl + appName + '.html'
+            iframeNew.className = 'empty'
+            // iframeNew.onload = function () {
+            //     this.className = ''
+            // }
             appsBox.appendChild(iframeNew)
         }
         function backOrForward(type) {
@@ -112,9 +125,12 @@
             appsBox.style.width = (deviceWidth * appsStack.stack.length) + 'px'
             history.pushState(null, null, '#/' + appName)
             var iframeNew = document.createElement('iframe')
-            iframeNew.src = 'http://10.100.0.39:8081/' + appName + '.html'
+            iframeNew.src = baseTargetUrl + appName + '.html'
             iframeNew.id = appName
-            iframeNew.frameborder = 0
+            iframeNew.className = 'empty'
+            // iframeNew.onload = function () {
+            //     this.className = ''
+            // }
             appsBox.appendChild(iframeNew)
             appsBox.className = 'app-' + appsStack.stack.length
 
@@ -146,7 +162,13 @@
                 backOrForward('back')
             } else {
                 if (typeof event.data === 'string') {
-                    openNewApp(event.data)
+                    if (event.data.indexOf('app-ready-') > -1) {
+                        var targetIframe = document.getElementById(event.data.replace('app-ready-', ''))
+                        console.log(event.data, 33333)
+                        targetIframe.className = ''
+                    } else {
+                        openNewApp(event.data)
+                    }
                 }
             }
         });
