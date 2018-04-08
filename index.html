@@ -102,33 +102,35 @@
             // 前进或者后退
             if (type === 'back') {
                 history.back()
+            } else {
+                setTimeout(function () {
+                    var appName = location.hash.replace('/', '').replace('#', '') || 'index'
+                    var newIndex = appsStack.stack.indexOf(appName)
+                    if (newIndex === -1) {
+                        // 刷新页面后点了前进或者后退按钮
+                        console.log('这时候判断不出是前进还是后退')
+                        window.location.reload()
+                    } else if (newIndex < appsStack.currentIndex) {
+                        // 后退
+                        console.log(appName, 90909090)
+                        console.log('后退')
+                    } else if (newIndex > appsStack.currentIndex) {
+                        // 前进
+                        console.log('前进')
+                    }
+                    var oldActive = document.getElementsByClassName('active')[0]
+                    if (oldActive) {
+                        var oldActiveId = oldActive.id
+                        setTimeout(function () {
+                            console.log(oldActiveId, 777777777)
+                            document.getElementById(oldActiveId).className = 'app'
+                        }, 350)
+                    }
+                    document.getElementById(appName + '-wrap').className = 'app active'
+                    appsStack.currentIndex = newIndex
+                    appsBox.className = 'app-' + (newIndex + 1)
+                }, 100)
             }
-            setTimeout(function () {
-                var appName = location.hash.replace('/', '').replace('#', '') || 'index'
-                var newIndex = appsStack.stack.indexOf(appName)
-                if (newIndex === -1) {
-                    // 刷新页面后点了前进或者后退按钮
-                    console.log('这时候判断不出是前进还是后退')
-                    window.location.reload()
-                } else if (newIndex < appsStack.currentIndex) {
-                    // 后退
-                    console.log(appName, 90909090)
-                    console.log('后退')
-                } else if (newIndex > appsStack.currentIndex) {
-                    // 前进
-                    console.log('前进')
-                }
-                var oldActive = document.getElementsByClassName('active')[0]
-                if (oldActive) {
-                    var oldActiveId = oldActive.id
-                    setTimeout(function () {
-                        document.getElementById(oldActiveId).className = 'app'
-                    }, 350)
-                }
-                document.getElementById(appName + '-wrap').className = 'app active'
-                appsStack.currentIndex = newIndex
-                appsBox.className = 'app-' + (newIndex + 1)
-            }, 100)
         }
         function openNewApp(appName) {
             // 进入一个新微app
@@ -196,7 +198,6 @@
                 if (typeof event.data === 'string') {
                     if (event.data.indexOf('app-ready-') > -1) {
                         var targetIframe = document.getElementById(event.data.replace('app-ready-', ''))
-                        console.log(event.data, 33333)
                         targetIframe.className = ''
                     } else {
                         openNewApp(event.data)
