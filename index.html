@@ -112,7 +112,6 @@
                         window.location.reload()
                     } else if (newIndex < appsStack.currentIndex) {
                         // 后退
-                        console.log(appName, 90909090)
                         console.log('后退')
                     } else if (newIndex > appsStack.currentIndex) {
                         // 前进
@@ -122,7 +121,6 @@
                     if (oldActive) {
                         var oldActiveId = oldActive.id
                         setTimeout(function () {
-                            console.log(oldActiveId, 777777777)
                             document.getElementById(oldActiveId).className = 'app'
                         }, 350)
                     }
