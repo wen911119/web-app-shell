@@ -71,8 +71,8 @@
     </style>
     <script>
         var deviceWidth = 375
-        var baseTargetUrl = 'http://192.168.31.10:8081/'
-        // var baseTargetUrl = 'http://10.100.0.39:8081/'
+        // var baseTargetUrl = 'http://192.168.31.10:8081/'
+        var baseTargetUrl = 'http://10.100.0.39:8081/'
         var appsStack = {
             stack: [],
             currentIndex: -1
@@ -81,19 +81,23 @@
 
         function refreshOrInit() {
             // 刷新或者第一次进入
-            var appName = location.hash.replace('/', '').replace('#', '') || 'index'
+            var appName = 'index'
+            var initInfo = ''
+            var urlInfo = location.hash.replace('/', '').replace('#', '')
+            if (urlInfo) {
+                var _temp_ = urlInfo.split('?init=')
+                appName = _temp_[0]
+                initInfo = _temp_[1]
+            }
             appsStack.stack.push(appName)
             appsStack.currentIndex = appsStack.stack.length - 1
             var iframeNew = document.createElement('iframe')
             iframeNew.id = appName
-            iframeNew.src = baseTargetUrl + appName + '.html'
+            iframeNew.src = baseTargetUrl + appName + '.html?init=' + initInfo
             iframeNew.className = 'empty'
             var app = document.createElement('div')
             app.id = appName + '-wrap'
             app.className = 'app active'
-            // iframeNew.onload = function () {
-            //     this.className = ''
-            // }
             app.appendChild(iframeNew)
             appsBox.appendChild(app)
             // appsBox.appendChild(iframeNew)
@@ -104,12 +108,20 @@
                 history.back()
             } else {
                 setTimeout(function () {
-                    var appName = location.hash.replace('/', '').replace('#', '') || 'index'
+                    var appName = 'index'
+                    var initInfo = ''
+                    var urlInfo = location.hash.replace('/', '').replace('#', '')
+                    if (urlInfo) {
+                        var _temp_ = urlInfo.split('?init=')
+                        appName = _temp_[0]
+                        initInfo = _temp_[1]
+                    }
                     var newIndex = appsStack.stack.indexOf(appName)
                     if (newIndex === -1) {
                         // 刷新页面后点了前进或者后退按钮
                         console.log('这时候判断不出是前进还是后退')
                         window.location.reload()
+                        return
                     } else if (newIndex < appsStack.currentIndex) {
                         // 后退
                         console.log('后退')
@@ -130,7 +142,8 @@
                 }, 100)
             }
         }
-        function openNewApp(appName) {
+        function openNewApp(appName, initInfo) {
+            initInfo = initInfo || ''
             // 进入一个新微app
             if (appsStack.stack.length - 1 !== appsStack.currentIndex) {
                 // 非栈顶
@@ -144,28 +157,21 @@
             appsStack.stack.push(appName)
             appsStack.currentIndex = appsStack.stack.length - 1
             appsBox.style.width = (deviceWidth * appsStack.stack.length) + 'px'
-            history.pushState(null, null, '#/' + appName)
+            history.pushState(null, null, '#/' + appName + '?init=' + initInfo)
             var iframeNew = document.createElement('iframe')
-            iframeNew.src = baseTargetUrl + appName + '.html'
+            iframeNew.src = baseTargetUrl + appName + '.html?init=' + initInfo
             iframeNew.id = appName
             iframeNew.className = 'empty'
             var app = document.createElement('div')
             app.id = appName + '-wrap'
             app.className = 'app active'
-            // iframeNew.onload = function () {
-            //     this.className = ''
-            // }
             var oldActiveId = document.getElementsByClassName('active')[0].id
             app.appendChild(iframeNew)
             appsBox.appendChild(app)
-            // appsBox.appendChild(iframeNew)
             appsBox.className = 'app-' + appsStack.stack.length
             setTimeout(function () {
                 document.getElementById(oldActiveId).className = 'app'
             }, 350)
-
-
-
         }
 
         function genCss() {
@@ -198,7 +204,8 @@
                         var targetIframe = document.getElementById(event.data.replace('app-ready-', ''))
                         targetIframe.className = ''
                     } else {
-                        openNewApp(event.data)
+                        var _temp_ = event.data.split('?init=')
+                        openNewApp(_temp_[0], _temp_[1])
                     }
                 }
             }
